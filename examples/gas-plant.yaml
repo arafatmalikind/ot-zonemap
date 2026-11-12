@@ -1,0 +1,106 @@
+# Fictional gas processing plant. Not based on any real site.
+name: Example gas processing plant
+
+zones:
+  - id: corp
+    name: Corporate IT
+    level: 5
+    sl_t: 1
+    sl_a: 2
+
+  - id: biz
+    name: Site business network
+    level: 4
+    sl_t: 2
+    sl_a: { FR1: 2, FR2: 2, FR3: 1, FR4: 2, FR5: 2, FR6: 2, FR7: 2 }
+    assets: [historian-mirror, erp-gw]
+
+  - id: dmz
+    name: Industrial DMZ
+    level: 3.5
+    sl_t: 3
+    sl_a: { FR1: 3, FR2: 3, FR3: 2, FR4: 3, FR5: 3, FR6: 2, FR7: 3 }
+    assets: [patch-server, av-relay, jump-host, historian-replica]
+
+  - id: ops
+    name: Plant operations
+    level: 3
+    sl_t: 3
+    sl_a: { FR1: 2, FR2: 2, FR3: 2, FR4: 2, FR5: 3, FR6: 2, FR7: 2 }
+    assets: [historian, eng-workstations, domain-ctrl-ot]
+
+  - id: dcs
+    name: DCS supervisory
+    level: 2
+    sl_t: 3
+    sl_a: { FR1: 2, FR2: 2, FR3: 3, FR4: 1, FR5: 3, FR6: 2, FR7: 3 }
+    assets: [operator-hmi, dcs-servers]
+
+  - id: sis
+    name: Safety instrumented system
+    level: 1
+    sl_t: 4
+    assets: [sis-controllers]
+
+  - id: field
+    name: Field controllers
+    level: 1
+    sl_t: 3
+    sl_a: 2
+    assets: [plc-compression, plc-utilities]
+
+  - id: lab
+    name: Lab analyser LAN
+    level: 2
+    sl_t: 2
+
+conduits:
+  - id: c01
+    from: corp
+    to: biz
+    protocols: [https, ldaps]
+    controls: [firewall]
+
+  - id: c02
+    from: biz
+    to: dmz
+    protocols: [https, smb]
+    controls: [firewall]
+
+  - id: c03
+    from: dmz
+    to: ops
+    protocols: [https, rdp]
+    controls: [firewall, mfa, jump_host, session_recording]
+    remote_access: true
+
+  - id: c04
+    from: ops
+    to: dcs
+    protocols: [opc-ua]
+    controls: [firewall]
+
+  - id: c05
+    from: dcs
+    to: field
+    protocols: [modbus/tcp, ethernet/ip]
+
+  - id: c06
+    from: dcs
+    to: sis
+    protocols: [modbus/tcp]
+    controls: [firewall]
+
+  - id: c07
+    from: ops
+    to: dmz
+    protocols: [opc-ua]
+    controls: [diode]
+    direction: both
+
+  # Vendor link that was added for commissioning and never removed.
+  - id: c08
+    from: biz
+    to: field
+    protocols: [vnc, modbus/tcp]
+    remote_access: true
